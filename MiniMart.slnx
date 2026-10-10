@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MiniMart.API/MiniMart.API.csproj" />
+  <Project Path="MiniMart.Client/MiniMart.Client.csproj" />
+  <Project Path="MiniMart.Shared/MiniMart.Shared.csproj" />
+</Solution>
