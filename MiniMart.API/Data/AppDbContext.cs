@@ -17,6 +17,10 @@ namespace MiniMart.API.Data
         // Member 1 (Leader) - Quản lý tài khoản nhân viên.
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Category> Categories { get; set; }
+
+        public DbSet<Product> Products { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
