@@ -1,0 +1,104 @@
+using MiniMart.Client.Forms;
+using MiniMart.Shared.DTOs.Users;
+using MiniMart.Shared.Enums;
+
+namespace MiniMart.Client.Navigation;
+
+/// <summary>
+/// Danh mục tập trung toàn bộ màn hình chức năng của 5 thành viên, dùng làm nguồn dữ liệu
+/// cho thanh điều hướng của <see cref="frmMain"/>.
+/// Khi một module hoàn thiện, chỉ cần thay <c>FormFactory</c> của mục tương ứng bằng form thật.
+/// </summary>
+public static class NavigationCatalog
+{
+    /// <summary>
+    /// Các màn hình đã đăng ký, sắp xếp theo thứ tự hiển thị trên thanh điều hướng.
+    /// </summary>
+    public static IReadOnlyList<NavigationItem> Items { get; } = new List<NavigationItem>
+    {
+        // Member 1 (Leader) - Hệ thống & thống kê
+        Pending(
+            key: "dashboard",
+            group: "Tổng quan",
+            title: "Tổng quan & thống kê",
+            description: "Xem nhanh doanh thu và tình hình bán hàng.",
+            owner: "Member 1 (Leader)"),
+        Pending(
+            key: "accounts",
+            group: "Hệ thống",
+            title: "Quản lý tài khoản nhân viên",
+            description: "Tạo, cập nhật, vô hiệu hóa tài khoản và phân quyền.",
+            owner: "Member 1 (Leader)",
+            requiredRole: UserRole.Admin),
+        Pending(
+            key: "login",
+            group: "Hệ thống",
+            title: "Đăng nhập / Đổi tài khoản",
+            description: "Màn hình đăng nhập sử dụng JWT trả về từ POST api/auth/login.",
+            owner: "Member 1 (Leader)"),
+
+        // Member 2 - Quản lý Sản phẩm (Catalog)
+        new NavigationItem(
+            Key: "catalog",
+            Group: "Danh mục",
+            Title: "Quản lý danh mục & sản phẩm",
+            Description: "CRUD danh mục và sản phẩm.",
+            FormFactory: () => new frmCatalogManager(),
+            RequiredRole: UserRole.Admin,
+            Owner: "Member 2"),
+
+        // Member 3 - Quản lý Khách hàng (Customers)
+        Pending(
+            key: "customers",
+            group: "Khách hàng",
+            title: "Quản lý khách hàng",
+            description: "CRUD khách hàng và theo dõi điểm tích lũy/hạng thành viên.",
+            owner: "Member 3"),
+
+        // Member 4 - Bán hàng (POS / Orders)
+        Pending(
+            key: "pos",
+            group: "Bán hàng",
+            title: "Bán hàng tại quầy (POS)",
+            description: "Chọn sản phẩm, tính tiền và in hóa đơn.",
+            owner: "Member 4"),
+
+        // Member 5 - Nhập kho (Inventory / Suppliers)
+        Pending(
+            key: "inventory",
+            group: "Nhập kho",
+            title: "Nhập kho & nhà cung cấp",
+            description: "Quản lý nhà cung cấp và tạo phiếu nhập kho.",
+            owner: "Member 5",
+            requiredRole: UserRole.Admin)
+    };
+
+    /// <summary>Lấy các màn hình hiển thị với tài khoản đang đăng nhập, giữ nguyên thứ tự đăng ký.</summary>
+    public static IReadOnlyList<NavigationItem> VisibleItems(UserDto? currentUser)
+        => Items.Where(item => item.IsVisibleFor(currentUser)).ToList();
+
+    /// <summary>Lấy các màn hình hiển thị với tài khoản đang đăng nhập, đã nhóm theo <see cref="NavigationItem.Group"/>.</summary>
+    public static IReadOnlyList<IGrouping<string, NavigationItem>> VisibleGroups(UserDto? currentUser)
+        => VisibleItems(currentUser).GroupBy(item => item.Group).ToList();
+
+    /// <summary>
+    /// Tạo màn hình giữ chỗ cho module chưa hoàn thiện, giúp thanh điều hướng
+    /// hiển thị đủ các màn hình ngay từ đầu.
+    /// </summary>
+    private static NavigationItem Pending(
+        string key,
+        string group,
+        string title,
+        string description,
+        string owner,
+        UserRole? requiredRole = null)
+        => new(
+            Key: key,
+            Group: group,
+            Title: title,
+            Description: description,
+            FormFactory: () => new frmPlaceholder(title, owner),
+            RequiredRole: requiredRole,
+            Owner: owner,
+            IsReady: false);
+}
