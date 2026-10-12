@@ -13,6 +13,9 @@ static class Program
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
-        Application.Run(new frmCatalogManager());
+
+        // frmMain là form chung điều hướng tới màn hình chức năng của toàn bộ thành viên.
+        // Khi có màn hình đăng nhập, truyền UserDto vào: Application.Run(new frmMain(loggedInUser));
+        Application.Run(new frmMain());
     }    
 }
