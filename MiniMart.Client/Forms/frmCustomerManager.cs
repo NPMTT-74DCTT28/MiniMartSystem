@@ -1,9 +1,13 @@
+using System.ComponentModel;
+using MiniMart.Client.HttpClients;
 using MiniMart.Shared.DTOs.Customer;
 
 namespace MiniMart.Client.Forms;
 
 public class frmCustomerManager : Form
 {
+    private readonly BaseHttpClient _apiClient = new();
+
     private readonly DataGridView dgvCustomers = new()
     {
         AllowUserToAddRows = false,
@@ -109,8 +113,189 @@ public class frmCustomerManager : Form
         btnDelete.Click += BtnDelete_Click;
         btnUpdatePoints.Click += BtnUpdatePoints_Click;
         btnClear.Click += BtnClear_Click;
+        dgvCustomers.SelectionChanged += (_, _) => SelectCustomer();
+        Load += async (_, _) =>
+        {
+            try
+            {
+                await LoadCustomersAsync();
+            }
+            catch (Exception exception)
+            {
+                ShowApiError(exception);
+            }
+        };
     }
 
+    private async Task LoadCustomersAsync()
+    {
+        var customers = await _apiClient.GetAsync<List<CustomerDto>>("api/customers");
+        dgvCustomers.DataSource = new BindingList<CustomerDto>(customers ?? new List<CustomerDto>());
+        ClearCustomerForm();
+    }
+
+    private void SelectCustomer()
+    {
+        if (dgvCustomers.SelectedRows.Count == 0 || dgvCustomers.CurrentRow?.DataBoundItem is not CustomerDto customer)
+        {
+            return;
+        }
+
+        txtId.Text = customer.Id.ToString();
+        txtFullName.Text = customer.FullName;
+        txtPhoneNumber.Text = customer.PhoneNumber;
+        txtTotalPoints.Text = customer.TotalPoints.ToString();
+    }
+
+    private void ClearCustomerForm()
+    {
+        txtId.Clear();
+        txtFullName.Clear();
+        txtPhoneNumber.Clear();
+        txtTotalPoints.Clear();
+        dgvCustomers.ClearSelection();
+    }
+
+    private static void ShowApiError(Exception exception)
+    {
+        MessageBox.Show(exception.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        var errorMessage = await response.Content.ReadAsStringAsync();
+        if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            throw new InvalidOperationException(errorMessage);
+        }
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    private bool ValidateCustomerForm()
+    {
+        if (string.IsNullOrWhiteSpace(txtFullName.Text))
+        {
+            MessageBox.Show("Vui lòng nhập họ và tên khách hàng.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            txtFullName.Focus();
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(txtPhoneNumber.Text))
+        {
+            MessageBox.Show("Vui lòng nhập số điện thoại khách hàng.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            txtPhoneNumber.Focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryGetSelectedCustomerId(out int customerId)
+    {
+        if (dgvCustomers.SelectedRows.Count > 0 && dgvCustomers.CurrentRow?.DataBoundItem is CustomerDto customer)
+        {
+            customerId = customer.Id;
+            return true;
+        }
+
+        customerId = 0;
+        MessageBox.Show("Vui lòng chọn khách hàng.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return false;
+    }
+
+    private async Task CreateCustomerAsync()
+    {
+        if (!ValidateCustomerForm())
+        {
+            return;
+        }
+
+        using var response = await _apiClient.PostAsync("api/customers", new CreateCustomerDto
+        {
+            FullName = txtFullName.Text.Trim(),
+            PhoneNumber = txtPhoneNumber.Text.Trim()
+        });
+        await EnsureSuccessAsync(response);
+        await LoadCustomersAsync();
+        MessageBox.Show("Đã thêm khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private async Task UpdateCustomerAsync()
+    {
+        if (!TryGetSelectedCustomerId(out var customerId) || !ValidateCustomerForm())
+        {
+            return;
+        }
+
+        using var response = await _apiClient.PutAsync($"api/customers/{customerId}", new UpdateCustomerDto
+        {
+            FullName = txtFullName.Text.Trim(),
+            PhoneNumber = txtPhoneNumber.Text.Trim()
+        });
+        await EnsureSuccessAsync(response);
+        await LoadCustomersAsync();
+        MessageBox.Show("Đã cập nhật khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private async Task DeleteCustomerAsync()
+    {
+        if (!TryGetSelectedCustomerId(out var customerId))
+        {
+            return;
+        }
+
+        var confirmation = MessageBox.Show(
+            "Bạn có chắc chắn muốn xóa khách hàng này?",
+            "Xác nhận xóa",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning);
+        if (confirmation != DialogResult.Yes)
+        {
+            return;
+        }
+
+        using var response = await _apiClient.DeleteAsync($"api/customers/{customerId}");
+        await EnsureSuccessAsync(response);
+        await LoadCustomersAsync();
+        MessageBox.Show("Đã xóa khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private async Task UpdatePointsAsync()
+    {
+        if (!TryGetSelectedCustomerId(out var customerId))
+        {
+            return;
+        }
+
+        var pointsText = Microsoft.VisualBasic.Interaction.InputBox(
+            "Nhập tổng điểm tích lũy mới:",
+            "Cập nhật điểm",
+            txtTotalPoints.Text);
+        if (string.IsNullOrWhiteSpace(pointsText))
+        {
+            return;
+        }
+
+        if (!int.TryParse(pointsText, out var totalPoints) || totalPoints < 0)
+        {
+            MessageBox.Show("Vui lòng nhập số điểm nguyên không âm.", "Dữ liệu không hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        using var response = await _apiClient.PatchAsync($"api/customers/{customerId}/points", new UpdatePointsDto
+        {
+            TotalPoints = totalPoints
+        });
+        await EnsureSuccessAsync(response);
+        await LoadCustomersAsync();
+        MessageBox.Show("Đã cập nhật điểm khách hàng.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
 
     private static Panel CreateCustomerField(string labelText, TextBox textBox)
     {
@@ -146,23 +331,63 @@ public class frmCustomerManager : Form
     }
 
 
-    private void BtnAdd_Click(object? sender, EventArgs e)
+    private async void BtnAdd_Click(object? sender, EventArgs e)
     {
+        try
+        {
+            await CreateCustomerAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowApiError(exception);
+        }
     }
 
-    private void BtnEdit_Click(object? sender, EventArgs e)
+    private async void BtnEdit_Click(object? sender, EventArgs e)
     {
+        try
+        {
+            await UpdateCustomerAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowApiError(exception);
+        }
     }
 
-    private void BtnDelete_Click(object? sender, EventArgs e)
+    private async void BtnDelete_Click(object? sender, EventArgs e)
     {
+        try
+        {
+            await DeleteCustomerAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowApiError(exception);
+        }
     }
 
-    private void BtnUpdatePoints_Click(object? sender, EventArgs e)
+    private async void BtnUpdatePoints_Click(object? sender, EventArgs e)
     {
+        try
+        {
+            await UpdatePointsAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowApiError(exception);
+        }
     }
 
-    private void BtnClear_Click(object? sender, EventArgs e)
+    private async void BtnClear_Click(object? sender, EventArgs e)
     {
+        try
+        {
+            await LoadCustomersAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowApiError(exception);
+        }
     }
 }
