@@ -21,6 +21,7 @@ public partial class frmCatalogManager : Form
 
         Controls.Add(_tabCatalog);
         InitializeCategoryTab();
+        InitializeProductTab();
     }
 
     private static async Task EnsureSuccessAsync(HttpResponseMessage response)
