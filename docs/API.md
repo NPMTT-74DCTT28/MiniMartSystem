@@ -65,3 +65,34 @@ nên API có thể phân quyền bằng `[Authorize(Roles = "Admin")]`.
   được nạp từ biến môi trường hoặc user-secrets thay vì commit vào repo.
 - Mật khẩu **không bao giờ** lưu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu
   và `PasswordHelper.Verify` khi đăng nhập.
+
+## 3. Cổng chạy API & cách Client kết nối
+
+Cổng chuẩn (khai báo trong `MiniMart.API/Properties/launchSettings.json`):
+
+| Profile | Địa chỉ API |
+|---|---|
+| `http` | `http://localhost:5000` |
+| `https` | `https://localhost:5001` và `http://localhost:5000` |
+
+Profile `https` bind **cả hai** cổng, nên Client mặc định gọi `http://localhost:5000/`
+vẫn hoạt động với cả hai profile: khi API chạy bằng HTTPS, request vào cổng 5000 sẽ được
+`UseHttpsRedirection()` chuyển sang `https://localhost:5001`.
+
+`BaseHttpClient` (`MiniMart.Client/HttpClients/BaseHttpClient.cs`) xác định địa chỉ API theo
+thứ tự ưu tiên sau:
+
+1. Tham số truyền vào constructor: `new BaseHttpClient("https://localhost:5001/")`.
+2. Biến môi trường `MINIMART_API_BASE_URL` (dùng khi muốn gọi thẳng HTTPS hoặc trỏ vào API
+   tập trung qua Tailscale mà không phải build lại Client).
+3. Mặc định `http://localhost:5000/`.
+
+Ví dụ chạy Client gọi thẳng HTTPS:
+
+```powershell
+$env:MINIMART_API_BASE_URL = "https://localhost:5001/"
+dotnet run --project MiniMart.Client
+```
+
+> Nếu API chỉ chạy profile `http` thì không có cổng HTTPS nào được mở, vì vậy đừng đặt
+> mặc định của Client là `https://localhost:5001/`; hãy dùng biến môi trường khi cần.
