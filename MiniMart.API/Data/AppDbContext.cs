@@ -23,6 +23,11 @@ namespace MiniMart.API.Data
 
         public DbSet<Customer> Customers { get; set; }
 
+        // Order management
+        public DbSet<Order> Orders { get; set; }
+
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -40,6 +45,12 @@ namespace MiniMart.API.Data
                 .Property(u => u.Role)
                 .HasConversion<string>()
                 .HasMaxLength(20);
+
+            // Order - OrderDetail relationship: One Order has many OrderDetails
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.OrderDetails)
+                .WithOne(od => od.Order)
+                .HasForeignKey(od => od.OrderId);
         }
     }
 }
