@@ -23,6 +23,10 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 - Dùng Data Annotations (như `[Required]`, `[MaxLength]`) trực tiếp trên Entity thay vì dùng Fluent API, trừ phi cấu hình khóa ngoại phức tạp.
 - Với property kiểu enum được lưu trong DB dạng chuỗi, cấu hình bằng Fluent API (`HasConversion<string>()` + `HasMaxLength(...)`) đúng theo kiểu cột đã có, nhằm tránh phát sinh migration không cần thiết.
 - Luôn kiểm tra `null` khi map dữ liệu từ Entity sang DTO và ngược lại.
+- KHÔNG sửa tay các file do EF Core sinh (`Migrations/*.cs`, `*.Designer.cs`, `AppDbContextModelSnapshot.cs`).
+  Sau khi merge/rebase phải kiểm tra bằng `dotnet ef migrations has-pending-model-changes`; nếu báo model thay
+  đổi ngoài ý muốn thì khôi phục lại đúng model của migration cuối (nguồn chuẩn là file `*.Designer.cs`) rồi
+  chạy `dotnet ef database update` để apply các migration còn pending.
 
 ## 4. Xử lý Lỗi (Error Handling)
 - API luôn trả về `IActionResult` (Ok, BadRequest, NotFound).
