@@ -10,6 +10,7 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 ## 2. Quy tắc đặt tên (Naming Conventions)
 - **Entities / Models:** PascalCase, danh từ số ít (VD: `Product`, `Customer`). Đặt trong project `MiniMart.Shared`.
 - **DTOs:** Hậu tố là `Dto` (VD: `ProductDto`, `CreateProductDto`). Đặt trong project `MiniMart.Shared`.
+- **Enums:** PascalCase, danh từ số ít và mô tả rõ ý nghĩa (VD: `UserRole`). Đặt trong thư mục `Enums` của project `MiniMart.Shared`. KHÔNG hardcode chuỗi cho các tập giá trị cố định (VD: vai trò `Admin` / `Staff`) mà phải dùng enum, và gắn `JsonStringEnumConverter` để JSON trao đổi với Client vẫn là chuỗi như contract.
 - **API Controllers:** Hậu tố là `Controller`, tiền tố là danh từ số nhiều (VD: `ProductsController`). Route luôn là `[Route("api/[controller]")]`.
 - **WinForms UI:** 
   - Tên Form bắt đầu bằng `frm` (VD: `frmProductManager`).
@@ -17,6 +18,7 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 
 ## 3. Quy định về Entity Framework Core
 - Dùng Data Annotations (như `[Required]`, `[MaxLength]`) trực tiếp trên Entity thay vì dùng Fluent API, trừ phi cấu hình khóa ngoại phức tạp.
+- Với property kiểu enum được lưu trong DB dạng chuỗi, cấu hình bằng Fluent API (`HasConversion<string>()` + `HasMaxLength(...)`) đúng theo kiểu cột đã có, nhằm tránh phát sinh migration không cần thiết.
 - Luôn kiểm tra `null` khi map dữ liệu từ Entity sang DTO và ngược lại.
 
 ## 4. Xử lý Lỗi (Error Handling)
