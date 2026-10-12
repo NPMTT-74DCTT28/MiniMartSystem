@@ -48,12 +48,13 @@ public static class NavigationCatalog
             Owner: "Member 2"),
 
         // Member 3 - Quản lý Khách hàng (Customers)
-        Pending(
-            key: "customers",
-            group: "Khách hàng",
-            title: "Quản lý khách hàng",
-            description: "CRUD khách hàng và theo dõi điểm tích lũy/hạng thành viên.",
-            owner: "Member 3"),
+        new NavigationItem(
+            Key: "customers",
+            Group: "Khách hàng",
+            Title: "Quản lý khách hàng",
+            Description: "CRUD khách hàng và theo dõi điểm tích lũy/hạng thành viên.",
+            FormFactory: () => new frmCustomerManager(),
+            Owner: "Member 3"),
 
         // Member 4 - Bán hàng (POS / Orders)
         Pending(
