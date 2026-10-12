@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MiniMart.Shared.Enums;
 
 namespace MiniMart.Shared.Entities
 {
@@ -22,8 +23,7 @@ namespace MiniMart.Shared.Entities
         /// Vai trò của người dùng: "Admin" hoặc "Staff".
         /// </summary>
         [Required]
-        [MaxLength(20)]
-        public string Role { get; set; } = "Staff";
+        public UserRole Role { get; set; } = UserRole.Staff;
 
         public bool IsActive { get; set; } = true;
     }
