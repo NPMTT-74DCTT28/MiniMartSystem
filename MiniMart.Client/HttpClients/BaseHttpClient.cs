@@ -81,6 +81,12 @@ namespace MiniMart.Client.HttpClients
             return await _httpClient.PutAsJsonAsync(endpoint, data);
         }
 
+        // Phương thức dùng chung để PATCH dữ liệu
+        public async Task<HttpResponseMessage> PatchAsync<T>(string endpoint, T data)
+        {
+            return await _httpClient.PatchAsJsonAsync(endpoint, data);
+        }
+
         // Phương thức dùng chung để DELETE dữ liệu
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
         {
