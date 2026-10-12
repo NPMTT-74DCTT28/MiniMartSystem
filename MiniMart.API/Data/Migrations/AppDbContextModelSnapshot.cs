@@ -68,6 +68,7 @@ namespace MiniMart.API.Data.Migrations
                 });
 
             modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+            modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,6 +98,23 @@ namespace MiniMart.API.Data.Migrations
                 });
 
             modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceiptDetail", b =>
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.OrderDetail", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,6 +126,7 @@ namespace MiniMart.API.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ImportReceiptId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
@@ -123,6 +142,16 @@ namespace MiniMart.API.Data.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ImportReceiptDetails");
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("MiniMart.Shared.Entities.Product", b =>
@@ -238,6 +267,22 @@ namespace MiniMart.API.Data.Migrations
                     b.HasOne("MiniMart.Shared.Entities.ImportReceipt", "ImportReceipt")
                         .WithMany("Details")
                         .HasForeignKey("ImportReceiptId")
+            modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.OrderDetail", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -248,6 +293,7 @@ namespace MiniMart.API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ImportReceipt");
+                    b.Navigation("Order");
 
                     b.Navigation("Product");
                 });
@@ -276,6 +322,9 @@ namespace MiniMart.API.Data.Migrations
             modelBuilder.Entity("MiniMart.Shared.Entities.Supplier", b =>
                 {
                     b.Navigation("ImportReceipts");
+            modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }
