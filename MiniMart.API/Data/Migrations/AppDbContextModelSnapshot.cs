@@ -67,6 +67,64 @@ namespace MiniMart.API.Data.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ImportDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ImportReceipts");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceiptDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ImportReceiptId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ImportPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportReceiptId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ImportReceiptDetails");
+                });
+
             modelBuilder.Entity("MiniMart.Shared.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -131,6 +189,44 @@ namespace MiniMart.API.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.Supplier", "Supplier")
+                        .WithMany("ImportReceipts")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniMart.Shared.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceiptDetail", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.ImportReceipt", "ImportReceipt")
+                        .WithMany("Details")
+                        .HasForeignKey("ImportReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniMart.Shared.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ImportReceipt");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("MiniMart.Shared.Entities.Product", b =>
                 {
                     b.HasOne("MiniMart.Shared.Entities.Category", "Category")
@@ -145,6 +241,16 @@ namespace MiniMart.API.Data.Migrations
             modelBuilder.Entity("MiniMart.Shared.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+                {
+                    b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.Supplier", b =>
+                {
+                    b.Navigation("ImportReceipts");
                 });
 #pragma warning restore 612, 618
         }
