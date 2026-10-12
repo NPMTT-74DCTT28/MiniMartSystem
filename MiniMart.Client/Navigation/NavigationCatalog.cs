@@ -20,7 +20,7 @@ public static class NavigationCatalog
         Pending(
             key: "dashboard",
             group: "Tổng quan",
-            title: "Tổng quan & thống kê",
+            title: "Tổng quan và thống kê",
             description: "Xem nhanh doanh thu và tình hình bán hàng.",
             owner: "Member 1 (Leader)"),
         Pending(
@@ -38,7 +38,7 @@ public static class NavigationCatalog
             owner: "Member 1 (Leader)"),
 
         // Member 2 - Quản lý Sản phẩm (Catalog)
-        new NavigationItem(
+        new(
             Key: "catalog",
             Group: "Danh mục",
             Title: "Quản lý danh mục & sản phẩm",
@@ -67,7 +67,7 @@ public static class NavigationCatalog
         Pending(
             key: "inventory",
             group: "Nhập kho",
-            title: "Nhập kho & nhà cung cấp",
+            title: "Nhập kho và nhà cung cấp",
             description: "Quản lý nhà cung cấp và tạo phiếu nhập kho.",
             owner: "Member 5",
             requiredRole: UserRole.Admin)
