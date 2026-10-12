@@ -33,3 +33,13 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 - KHÔNG bao giờ lưu mật khẩu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu và `PasswordHelper.Verify` khi đăng nhập (PBKDF2 - HMAC-SHA256, salt ngẫu nhiên cho từng tài khoản).
 - Khi đăng nhập thất bại, API trả cùng một thông báo cho cả trường hợp sai tên đăng nhập và sai mật khẩu để tránh dò tài khoản.
 - Cấu hình JWT đọc từ section `Jwt` trong `appsettings.json`; không hardcode khóa bí mật trong code C#.
+
+## 6. Quy trình làm việc theo Task (Workflow)
+Quy trình dưới đây áp dụng cho MỌI task được giao. Khi task có kèm mã công việc (task key, ví dụ dạng `PROJECT-123` trong Jira) thì phải dùng mã đó ở tên nhánh và commit message; nếu task không cung cấp mã công việc thì bỏ qua phần liên quan tới task key, các bước còn lại vẫn giữ nguyên.
+
+1. **Tạo nhánh:** rẽ nhánh từ `develop` (không rẽ từ `main` hay nhánh của thành viên khác). Tên nhánh mô tả ngắn gọn nội dung task và BẮT BUỘC chứa task key nếu được cung cấp, theo dạng `<loại>/<TASK-KEY>-<mô-tả-ngắn>`, ví dụ `feat/PROJECT-123-login-screen`. Việc không thuộc nghiệp vụ (tài liệu, cấu hình, dọn dẹp) dùng tiền tố `chore/` hoặc `docs/`.
+2. **Khảo sát trước khi sinh code:** đọc các tài liệu trong `docs` (`PLAN.md`, `AI_CONVENTIONS.md`, `SCHEMA.md`, `API.md`, `UI_NAVIGATION.md`) và duyệt qua toàn bộ dự án để nắm quy tắc chung, các module đã có và phạm vi của mình; tuyệt đối không vượt ranh giới module của thành viên khác (xem `docs/PLAN.md`).
+3. **Chia commit nhỏ:** hoàn thành từng phần nhỏ thì commit ngay, không dồn toàn bộ task vào một commit lớn.
+4. **Định dạng commit:** mọi commit dùng Conventional Commits và viết bằng tiếng Việt theo dạng `<type>(<scope>): <mô tả ngắn>`, với `type` thuộc `feat`, `fix`, `refactor`, `docs`, `chore`, `style`, `test`. Phần thân commit mô tả rõ thay đổi; nếu task có task key thì ghi thêm dòng `Refs: <TASK-KEY>` ở cuối. Có thể xem `git log` để lấy mẫu.
+5. **Nghiệm thu:** chạy build (`dotnet build MiniMart.slnx`), chạy các bước apply migration/kiểm thử liên quan và dọn sạch dữ liệu hay file tạm trước khi kết thúc.
+6. **Bàn giao:** khi task hoàn thành, thông báo cho người dùng để họ tự tạo PR trên GitHub (KHÔNG tự push hay tạo PR nếu không được yêu cầu), viết sẵn commit message chi tiết cho lần merge với **tiêu đề chứa task key**, và liệt kê đầy đủ mọi thay đổi để người dùng kiểm tra.
