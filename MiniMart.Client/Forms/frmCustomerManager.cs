@@ -39,7 +39,7 @@ public class frmCustomerManager : Form
             Padding = new Padding(12),
             RowCount = 3
         };
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
@@ -111,6 +111,7 @@ public class frmCustomerManager : Form
         btnClear.Click += BtnClear_Click;
     }
 
+
     private static Panel CreateCustomerField(string labelText, TextBox textBox)
     {
         var panel = new Panel
@@ -118,16 +119,32 @@ public class frmCustomerManager : Form
             Dock = DockStyle.Fill,
             Margin = new Padding(6)
         };
+
         var label = new Label
         {
             Dock = DockStyle.Top,
-            Text = labelText
+            Text = labelText,
+            Height = 30,
+            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+            ForeColor = Color.FromArgb(45, 55, 72),
+            TextAlign = ContentAlignment.MiddleLeft
         };
-        textBox.Dock = DockStyle.Bottom;
+
+        textBox.Dock = DockStyle.Top;
+        textBox.Margin = new Padding(0, 8, 0, 0);
+        textBox.Height = 35;
+        textBox.Font = new Font("Segoe UI", 11F);
+        textBox.BackColor = textBox.ReadOnly
+            ? Color.FromArgb(240, 243, 247)
+            : Color.White;
+        textBox.ForeColor = Color.FromArgb(30, 30, 30);
+
         panel.Controls.Add(textBox);
         panel.Controls.Add(label);
+
         return panel;
     }
+
 
     private void BtnAdd_Click(object? sender, EventArgs e)
     {
