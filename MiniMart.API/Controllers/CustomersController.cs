@@ -49,6 +49,48 @@ namespace MiniMart.API.Controllers
             return Ok(ToDto(customer));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateCustomer(CreateCustomerDto createCustomerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var customer = new Customer
+            {
+                FullName = createCustomerDto.FullName,
+                PhoneNumber = createCustomerDto.PhoneNumber
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, ToDto(customer));
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateCustomer(int id, UpdateCustomerDto updateCustomerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var customer = await _context.Customers.FindAsync(id);
+
+            if (customer is null)
+            {
+                return NotFound();
+            }
+
+            customer.FullName = updateCustomerDto.FullName;
+            customer.PhoneNumber = updateCustomerDto.PhoneNumber;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         private static CustomerDto ToDto(Customer customer)
         {
             return new CustomerDto
