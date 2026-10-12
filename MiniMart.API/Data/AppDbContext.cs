@@ -25,6 +25,10 @@ namespace MiniMart.API.Data
 
         public DbSet<Supplier> Suppliers { get; set; }
 
+        public DbSet<ImportReceipt> ImportReceipts { get; set; }
+
+        public DbSet<ImportReceiptDetail> ImportReceiptDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
