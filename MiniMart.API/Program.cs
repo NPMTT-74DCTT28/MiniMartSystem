@@ -1,5 +1,10 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MiniMart.API.Data;
+using MiniMart.API.Options;
+using MiniMart.API.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +21,32 @@ var connectionString = builder.Configuration.GetConnectionString("LocalDb");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// 4. Cấu hình xác thực JWT cho chức năng đăng nhập
+var jwtSection = builder.Configuration.GetSection(JwtSettings.SectionName);
+var jwtSettings = jwtSection.Get<JwtSettings>() ?? new JwtSettings();
+jwtSettings.Validate();
+
+builder.Services.Configure<JwtSettings>(jwtSection);
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Cấu hình HTTP request pipeline.
@@ -26,6 +57,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

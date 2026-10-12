@@ -24,3 +24,9 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 ## 4. Xử lý Lỗi (Error Handling)
 - API luôn trả về `IActionResult` (Ok, BadRequest, NotFound).
 - Giao diện WinForms luôn có khối `try-catch` khi gọi API, hiển thị lỗi qua `MessageBox.Show()`.
+
+## 5. Xác thực & Bảo mật
+- Endpoint đăng nhập đặt ở `AuthController` (`POST api/auth/login`) và trả về JWT access token; các endpoint nghiệp vụ cần phân quyền thì gắn `[Authorize]` / `[Authorize(Roles = "Admin")]`.
+- KHÔNG bao giờ lưu mật khẩu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu và `PasswordHelper.Verify` khi đăng nhập (PBKDF2 - HMAC-SHA256, salt ngẫu nhiên cho từng tài khoản).
+- Khi đăng nhập thất bại, API trả cùng một thông báo cho cả trường hợp sai tên đăng nhập và sai mật khẩu để tránh dò tài khoản.
+- Cấu hình JWT đọc từ section `Jwt` trong `appsettings.json`; không hardcode khóa bí mật trong code C#.
