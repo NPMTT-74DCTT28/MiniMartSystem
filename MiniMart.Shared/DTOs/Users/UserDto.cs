@@ -1,3 +1,5 @@
+using MiniMart.Shared.Enums;
+
 namespace MiniMart.Shared.DTOs.Users
 {
     /// <summary>
@@ -11,9 +13,9 @@ namespace MiniMart.Shared.DTOs.Users
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
-        /// Vai trò của người dùng: "Admin" hoặc "Staff".
+        /// Vai trò của người dùng (<see cref="UserRole.Admin"/> hoặc <see cref="UserRole.Staff"/>).
         /// </summary>
-        public string Role { get; set; } = string.Empty;
+        public UserRole Role { get; set; } = UserRole.Staff;
 
         public bool IsActive { get; set; }
     }

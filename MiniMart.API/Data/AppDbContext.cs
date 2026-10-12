@@ -33,6 +33,13 @@ namespace MiniMart.API.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            // Role là enum UserRole nhưng vẫn lưu trong DB dạng chuỗi ("Admin" | "Staff")
+            // để giữ nguyên cột nvarchar(20) và dữ liệu hiện có (không phát sinh migration).
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>()
+                .HasMaxLength(20);
         }
     }
 }

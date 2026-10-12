@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MiniMart.Shared.Enums;
 
 namespace MiniMart.Shared.DTOs.Users
 {
@@ -17,11 +18,11 @@ namespace MiniMart.Shared.DTOs.Users
         public string Password { get; set; } = string.Empty;
 
         /// <summary>
-        /// Vai trò của người dùng: "Admin" hoặc "Staff". Mặc định là "Staff".
+        /// Vai trò của người dùng (<see cref="UserRole.Admin"/> hoặc <see cref="UserRole.Staff"/>).
+        /// Mặc định là <see cref="UserRole.Staff"/>.
         /// </summary>
         [Required]
-        [MaxLength(20)]
-        public string Role { get; set; } = "Staff";
+        public UserRole Role { get; set; } = UserRole.Staff;
 
         public bool IsActive { get; set; } = true;
     }
