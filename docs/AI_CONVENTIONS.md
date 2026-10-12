@@ -15,6 +15,9 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 - **WinForms UI:** 
   - Tên Form bắt đầu bằng `frm` (VD: `frmProductManager`).
   - Controls: Nút bấm (`btnX`), Textbox (`txtX`), DataGridView (`dgvX`), ComboBox (`cbxX`).
+  - Mọi màn hình chức năng phải được đăng ký vào `MiniMart.Client/Navigation/NavigationCatalog.cs`
+    để điều hướng được từ form chung `frmMain`; xem `docs/UI_NAVIGATION.md`. KHÔNG tự mở form khác
+    bằng `Show()`/`ShowDialog()` trong màn hình con.
 
 ## 3. Quy định về Entity Framework Core
 - Dùng Data Annotations (như `[Required]`, `[MaxLength]`) trực tiếp trên Entity thay vì dùng Fluent API, trừ phi cấu hình khóa ngoại phức tạp.

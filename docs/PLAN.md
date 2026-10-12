@@ -39,6 +39,7 @@ Dự án được chia theo module chức năng dọc, mỗi thành viên phụ 
 
 ## 4. Trạng thái Hiện tại & Nhiệm vụ của AI Agent
 - **Trạng thái dự án:** Khung xương Solution (gồm 3 project `Shared`, `API`, `Client`), `AppDbContext`, `BaseHttpClient`, và chuỗi kết nối đã được Leader thiết lập hoàn chỉnh.
+- **Form chung điều hướng:** `frmMain` (`MiniMart.Client/Forms/frmMain.cs`) là form khởi động, hiển thị thanh điều hướng tới màn hình của cả 5 thành viên. Danh sách màn hình tập trung tại `MiniMart.Client/Navigation/NavigationCatalog.cs`; chi tiết xem `docs/UI_NAVIGATION.md`.
 - **Nhiệm vụ của AI:** 
   - Đóng vai trò là trợ lý lập trình, hỗ trợ từng thành viên hoàn thiện chức năng dọc (từ DB đến UI) dựa trên phân công ở Mục 3.
   - Khi được yêu cầu viết code cho một module, chỉ tập trung sinh Models, DTOs, API Controllers và Code-behind (WinForms) cho riêng module đó.
