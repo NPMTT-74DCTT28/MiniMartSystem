@@ -7,7 +7,7 @@ namespace MiniMart.Client.HttpClients
         protected readonly HttpClient _httpClient;
 
         // Địa chỉ base của Web API (Thay đổi cổng chạy thực tế của bạn)
-        private const string BaseAddress = "https://localhost:7001/";
+        private const string BaseAddress = "https://localhost:7070/";
 
         public BaseHttpClient()
         {
