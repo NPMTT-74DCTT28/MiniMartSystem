@@ -67,6 +67,7 @@ namespace MiniMart.API.Data.Migrations
                     b.ToTable("Customers");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
             modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -75,6 +76,28 @@ namespace MiniMart.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("ImportDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ImportReceipts");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceiptDetail", b =>
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
@@ -99,6 +122,10 @@ namespace MiniMart.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("ImportPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ImportReceiptId")
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -108,6 +135,13 @@ namespace MiniMart.API.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportReceiptId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ImportReceiptDetails");
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -152,6 +186,31 @@ namespace MiniMart.API.Data.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.Supplier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Suppliers");
+                });
+
             modelBuilder.Entity("MiniMart.Shared.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -184,6 +243,30 @@ namespace MiniMart.API.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.Supplier", "Supplier")
+                        .WithMany("ImportReceipts")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniMart.Shared.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceiptDetail", b =>
+                {
+                    b.HasOne("MiniMart.Shared.Entities.ImportReceipt", "ImportReceipt")
+                        .WithMany("Details")
+                        .HasForeignKey("ImportReceiptId")
             modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
                 {
                     b.HasOne("MiniMart.Shared.Entities.Customer", "Customer")
@@ -209,6 +292,7 @@ namespace MiniMart.API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("ImportReceipt");
                     b.Navigation("Order");
 
                     b.Navigation("Product");
@@ -230,6 +314,14 @@ namespace MiniMart.API.Data.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("MiniMart.Shared.Entities.ImportReceipt", b =>
+                {
+                    b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("MiniMart.Shared.Entities.Supplier", b =>
+                {
+                    b.Navigation("ImportReceipts");
             modelBuilder.Entity("MiniMart.Shared.Entities.Order", b =>
                 {
                     b.Navigation("OrderDetails");

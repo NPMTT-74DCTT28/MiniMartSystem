@@ -23,6 +23,11 @@ namespace MiniMart.API.Data
 
         public DbSet<Customer> Customers { get; set; }
 
+        public DbSet<Supplier> Suppliers { get; set; }
+
+        public DbSet<ImportReceipt> ImportReceipts { get; set; }
+
+        public DbSet<ImportReceiptDetail> ImportReceiptDetails { get; set; }
         // Order management
         public DbSet<Order> Orders { get; set; }
 
