@@ -41,7 +41,7 @@ public static class NavigationCatalog
         new(
             Key: "catalog",
             Group: "Danh mục",
-            Title: "Quản lý danh mục & sản phẩm",
+            Title: "Quản lý danh mục và sản phẩm",
             Description: "CRUD danh mục và sản phẩm.",
             FormFactory: () => new frmCatalogManager(),
             RequiredRole: UserRole.Admin,
