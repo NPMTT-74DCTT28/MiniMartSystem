@@ -91,6 +91,43 @@ namespace MiniMart.API.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
+
+            if (customer is null)
+            {
+                return NotFound();
+            }
+
+            _context.Customers.Remove(customer);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}/points")]
+        public async Task<IActionResult> UpdatePoints(int id, UpdatePointsDto updatePointsDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var customer = await _context.Customers.FindAsync(id);
+
+            if (customer is null)
+            {
+                return NotFound();
+            }
+
+            customer.TotalPoints = updatePointsDto.TotalPoints;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         private static CustomerDto ToDto(Customer customer)
         {
             return new CustomerDto
