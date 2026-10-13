@@ -52,12 +52,13 @@ public static class NavigationCatalog
             Owner: "Member 3"),
 
         // Member 4 - Bán hàng (POS / Orders)
-        Pending(
-            key: "pos",
-            group: "Bán hàng",
-            title: "Bán hàng tại quầy (POS)",
-            description: "Chọn sản phẩm, tính tiền và in hóa đơn.",
-            owner: "Member 4"),
+        new NavigationItem(
+            Key: "pos",
+            Group: "Bán hàng",
+            Title: "Bán hàng tại quầy (POS)",
+            Description: "Chọn sản phẩm, tính tiền và in hóa đơn.",
+            FormFactory: () => new frmPosScreen(),
+            Owner: "Member 4"),
 
         // Member 5 - Nhập kho (Inventory / Suppliers)
         new NavigationItem(

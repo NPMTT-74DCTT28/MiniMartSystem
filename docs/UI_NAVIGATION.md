@@ -44,7 +44,7 @@ Nếu module mới chỉ dành cho `Admin`, thêm `RequiredRole: UserRole.Admin`
 | `accounts` | Hệ thống | Quản lý tài khoản nhân viên (Admin) | **Hoàn thiện** | Member 1 (Leader) |
 | `catalog` | Danh mục | Quản lý danh mục & sản phẩm (Admin) | **Hoàn thiện** | Member 2 |
 | `customers` | Khách hàng | Quản lý khách hàng | Đang phát triển | Member 3 |
-| `pos` | Bán hàng | Bán hàng tại quầy (POS) | Đang phát triển | Member 4 |
+| `pos` | Bán hàng | Bán hàng tại quầy (POS) | **Hoàn thiện** | Member 4 |
 | `inventory` | Nhập kho | Nhập kho & nhà cung cấp (Admin) | **Hoàn thiện** | Member 5 |
 
 Màn hình chưa hoàn thiện dùng `frmPlaceholder` (tên hiển thị kèm dấu `*`) để thanh điều hướng
