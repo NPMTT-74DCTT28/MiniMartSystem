@@ -194,7 +194,74 @@ cùng `OrderDto` và đường dẫn tới hóa đơn vừa tạo.
 - Mật khẩu **không bao giờ** lưu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu
   và `PasswordHelper.Verify` khi đăng nhập.
 
-## 6. Cổng chạy API & cách Client kết nối
+## 6. Thống kê Dashboard (Dashboard)
+
+Endpoint tổng hợp số liệu cho màn hình Dashboard. Client WinForms không đọc trực tiếp database
+nên toàn bộ số liệu được trả về trong **một** lần gọi, thay vì ghép nhiều API ở phía Client.
+Endpoint chỉ **đọc** dữ liệu (`AsNoTracking`), không thay đổi schema hay nghiệp vụ của module nào.
+
+| Method | Route | Mô tả | Mã lỗi |
+|---|---|---|---|
+| `GET` | `/api/dashboard?from=&to=` | Số liệu thống kê của kỳ `from` - `to` (UTC) | `400`, `401` |
+
+**Tham số truy vấn**
+
+| Tham số | Bắt buộc | Ghi chú |
+|---|---|---|
+| `from` | Không | Ngày bắt đầu kỳ (UTC), mặc định là 29 ngày trước `to` |
+| `to` | Không | Ngày kết thúc kỳ (UTC), tính trọn ngày; mặc định là hôm nay |
+
+Kỳ thống kê tối đa **366 ngày**; `from` sau `to` hoặc vượt quá giới hạn đều trả `400 Bad Request`.
+Endpoint gắn `[Authorize]` nên mọi vai trò đã đăng nhập đều xem được, chưa đăng nhập nhận `401`.
+
+**Response 200** (`DashboardStatisticsDto`)
+
+```json
+{
+  "fromDate": "2026-09-14T00:00:00Z",
+  "toDate": "2026-10-13T00:00:00Z",
+  "summary": {
+    "totalRevenue": 133500.00,
+    "orderCount": 4,
+    "averageOrderValue": 33375.00,
+    "totalImportAmount": 85000.00,
+    "importReceiptCount": 2,
+    "totalProducts": 4,
+    "lowStockProductCount": 2,
+    "totalCustomers": 2,
+    "totalUsers": 1,
+    "totalQuantitySold": 12
+  },
+  "revenueByDay": [
+    { "date": "2026-09-14T00:00:00Z", "orderCount": 0, "revenue": 0 },
+    { "date": "2026-10-13T00:00:00Z", "orderCount": 2, "revenue": 68500.00 }
+  ],
+  "topProducts": [
+    { "productId": 1, "productName": "Coca Cola 330ml", "quantitySold": 7, "revenue": 70000.00 }
+  ],
+  "revenueByCategory": [
+    { "categoryId": 1, "categoryName": "Do uong", "quantitySold": 10, "revenue": 98500.00 }
+  ],
+  "revenueByUser": [
+    { "userId": "8849ef07-2b98-40e6-926b-99e6eb1a1021", "username": "admin", "orderCount": 4, "revenue": 133500.00 }
+  ],
+  "topCustomers": [
+    { "customerId": 1, "fullName": "Nguyen Van A", "phoneNumber": "0901111111",
+      "orderCount": 2, "revenue": 90000.00, "totalPoints": 120 }
+  ]
+}
+```
+
+- `revenueByDay` trả **đủ mọi ngày** trong kỳ (kể cả ngày không phát sinh, với `revenue = 0`)
+  để biểu đồ của Client không bị đứt quãng.
+- `topProducts`, `revenueByUser` và `topCustomers` giới hạn **5 dòng**; `revenueByCategory` trả
+  đủ các danh mục phát sinh doanh thu trong kỳ.
+- Chỉ số `totalRevenue`, `orderCount`, `averageOrderValue`, `totalQuantitySold`,
+  `totalImportAmount` và `importReceiptCount` tính theo kỳ đã chọn; các chỉ số đếm còn lại
+  (`totalProducts`, `lowStockProductCount`, `totalCustomers`, `totalUsers`) là số liệu hiện tại.
+- Ngưỡng "sắp hết hàng" là `StockQuantity <= 10` (`DashboardController.LowStockThreshold`).
+
+## 7. Cổng chạy API & cách Client kết nối
 
 Cổng chuẩn (khai báo trong `MiniMart.API/Properties/launchSettings.json`):
 
@@ -225,7 +292,7 @@ dotnet run --project MiniMart.Client
 > Nếu API chỉ chạy profile `http` thì không có cổng HTTPS nào được mở, vì vậy đừng đặt
 > mặc định của Client là `https://localhost:5001/`; hãy dùng biến môi trường khi cần.
 
-## 7. Xác thực token ở phía Client
+## 8. Xác thực token ở phía Client
 
 - `MiniMart.Client/Security/AuthSession.cs` là nơi duy nhất giữ access token và tài khoản đang
   đăng nhập trong bộ nhớ; `frmLogin` gọi `AuthSession.SignIn(...)` sau khi đăng nhập thành công và

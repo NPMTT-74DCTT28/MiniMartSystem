@@ -42,6 +42,7 @@ Dự án được chia theo module chức năng dọc, mỗi thành viên phụ 
 - **Form chung điều hướng:** `frmMain` (`MiniMart.Client/Forms/frmMain.cs`) là form khởi động, hiển thị thanh điều hướng tới màn hình của cả 5 thành viên. Danh sách màn hình tập trung tại `MiniMart.Client/Navigation/NavigationCatalog.cs`; chi tiết xem `docs/UI_NAVIGATION.md`.
 - **Màn hình đăng nhập:** `frmLogin` (`MiniMart.Client/Forms/frmLogin.cs`) chạy trước `frmMain`, dùng `POST api/auth/login` và lưu JWT vào `MiniMart.Client/Security/AuthSession.cs`. `BaseHttpClient` tự gắn Bearer token nên mọi màn hình chức năng gọi API đã xác thực được ngay.
 - **Quản lý tài khoản:** API `api/users` (CRUD, chỉ Admin) và màn hình `frmAccountManager` đã hoàn thiện; API tự tạo tài khoản `admin` mặc định khi database trống (xem `docs/API.md`).
+- **Dashboard thống kê:** API `api/dashboard` tổng hợp số liệu từ nhiều bảng (hóa đơn, sản phẩm, khách hàng, nhân viên, phiếu nhập kho) và màn hình `frmDashboard` hiển thị thẻ số liệu, biểu đồ doanh thu cùng các bảng xếp hạng (xem `docs/API.md`).
 - **Nhiệm vụ của AI:** 
   - Đóng vai trò là trợ lý lập trình, hỗ trợ từng thành viên hoàn thiện chức năng dọc (từ DB đến UI) dựa trên phân công ở Mục 3.
   - Khi được yêu cầu viết code cho một module, chỉ tập trung sinh Models, DTOs, API Controllers và Code-behind (WinForms) cho riêng module đó.
