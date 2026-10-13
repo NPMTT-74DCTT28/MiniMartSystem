@@ -182,7 +182,10 @@ public partial class frmDashboard
             ChartArea = area.Name,
             ChartType = SeriesChartType.Column,
             IsValueShownAsLabel = false,
-            ToolTip = "#VALX{dd/MM/yyyy}: #VAL{N0}"
+            ToolTip = "#VALX{dd/MM/yyyy}: #VAL{N0}",
+            // Khai báo rõ trục X là ngày, nếu không Chart có thể coi giá trị là chuỗi
+            // và in ra đúng chuỗi định dạng "dd/MM" thay vì ngày thật.
+            XValueType = ChartValueType.DateTime
         };
         series["PointWidth"] = "0.6";
         chtRevenueByDay.Series.Add(series);

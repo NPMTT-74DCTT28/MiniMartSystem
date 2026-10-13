@@ -155,26 +155,37 @@ public partial class frmDashboard : Form
 
     private void InitializeLayout()
     {
-        var root = new TableLayoutPanel
+        // Panel cuộn bọc ngoài + bảng bố cục Dock=Top: khi nội dung cao hơn cửa sổ chỉ xuất hiện
+        // thanh cuộn dọc, tránh thanh cuộn ngang do bảng vừa AutoScroll vừa dùng cột Percent.
+        var scroller = new Panel
         {
             AutoScroll = true,
-            ColumnCount = 1,
             Dock = DockStyle.Fill,
+            Name = "pnlDashboardScroll"
+        };
+
+        var root = new TableLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            Dock = DockStyle.Top,
             Name = "tblDashboardRoot",
             Padding = new Padding(16),
             RowCount = 4
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 214));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 320));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 620));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 120));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 356));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 340));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 560));
 
         root.Controls.Add(BuildHeader(), 0, 0);
         root.Controls.Add(BuildCardsPanel(), 0, 1);
         root.Controls.Add(BuildChartPanel(), 0, 2);
         root.Controls.Add(BuildTablesPanel(), 0, 3);
 
-        Controls.Add(root);
+        scroller.Controls.Add(root);
+        Controls.Add(scroller);
     }
 
     private Control BuildHeader()
@@ -196,12 +207,12 @@ public partial class frmDashboard : Form
             Name = "tblDashboardTitles",
             RowCount = 3
         };
-        titles.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
-        titles.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));
+        titles.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        titles.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
         titles.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         titles.Controls.Add(new Label
         {
-            AutoSize = true,
+            AutoSize = false,
             Dock = DockStyle.Fill,
             Font = new Font("Segoe UI", 18F, FontStyle.Bold),
             ForeColor = HeaderTextColor,
@@ -211,7 +222,7 @@ public partial class frmDashboard : Form
         }, 0, 0);
         titles.Controls.Add(new Label
         {
-            AutoSize = true,
+            AutoSize = false,
             Dock = DockStyle.Fill,
             ForeColor = MutedTextColor,
             Name = "lblDashboardDescription",
@@ -232,11 +243,11 @@ public partial class frmDashboard : Form
             ColumnCount = 1,
             Dock = DockStyle.Fill,
             Name = "tblDashboardRange",
-            Padding = new Padding(0, 18, 0, 0),
+            Padding = new Padding(0, 14, 0, 0),
             RowCount = 2
         };
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
         var pickers = new FlowLayoutPanel
         {
@@ -292,22 +303,34 @@ public partial class frmDashboard : Form
             Text = "Chỉ số tổng hợp"
         };
 
-        var flow = new FlowLayoutPanel
+        // Lưới 4 cột x 3 dòng: số cột cố định nên thẻ luôn xếp gọn ở mọi kích thước cửa sổ,
+        // tránh việc vừa cuộn vừa tự động xuống dòng như FlowLayoutPanel.
+        var grid = new TableLayoutPanel
         {
-            AutoScroll = true,
+            ColumnCount = 4,
             Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.LeftToRight,
-            Name = "flpDashboardCards",
-            Padding = new Padding(4),
-            WrapContents = true
+            Name = "tblDashboardCards",
+            Padding = new Padding(2),
+            RowCount = 3
         };
 
-        foreach (var definition in CardDefinitions)
+        for (var column = 0; column < grid.ColumnCount; column++)
         {
-            flow.Controls.Add(CreateCard(definition));
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         }
 
-        group.Controls.Add(flow);
+        for (var row = 0; row < grid.RowCount; row++)
+        {
+            grid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33f));
+        }
+
+        for (var index = 0; index < CardDefinitions.Length; index++)
+        {
+            var definition = CardDefinitions[index];
+            grid.Controls.Add(CreateCard(definition), index % grid.ColumnCount, index / grid.ColumnCount);
+        }
+
+        group.Controls.Add(grid);
         return group;
     }
 
@@ -316,11 +339,10 @@ public partial class frmDashboard : Form
         var card = new Panel
         {
             BackColor = definition.IsHighlight ? Color.FromArgb(254, 243, 199) : Color.FromArgb(243, 244, 246),
-            Height = 84,
+            Dock = DockStyle.Fill,
             Margin = new Padding(6),
             Name = $"pnlCard{definition.Key}",
-            Padding = new Padding(12, 8, 12, 8),
-            Width = 216
+            Padding = new Padding(12, 8, 12, 8)
         };
 
         var caption = new Label
@@ -328,7 +350,7 @@ public partial class frmDashboard : Form
             AutoSize = false,
             Dock = DockStyle.Top,
             ForeColor = MutedTextColor,
-            Height = 22,
+            Height = 32,
             Name = $"lblCard{definition.Key}Caption",
             Text = definition.Title,
             TextAlign = ContentAlignment.MiddleLeft
