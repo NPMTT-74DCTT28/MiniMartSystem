@@ -156,7 +156,37 @@ từ các dòng chi tiết. Tồn kho sản phẩm được cộng trong cùng g
 Phiếu nhập phải có ít nhất một dòng; `quantity` phải lớn hơn 0 và `importPrice` không được âm.
 API trả `409 Conflict` nếu xóa nhà cung cấp đã được dùng trong phiếu nhập để bảo toàn lịch sử.
 
-## 4. Quy ước chung
+## 4. Bán hàng và hóa đơn (Orders)
+
+Các endpoint hóa đơn yêu cầu đăng nhập (`[Authorize]`). Client không gửi `UserId`, `OrderDate`,
+`TotalAmount` hoặc `UnitPrice`: API lấy nhân viên từ JWT, đặt thời gian UTC, lấy đơn giá hiện tại
+từ sản phẩm và tự tính tổng tiền. Việc tạo hóa đơn và trừ tồn kho được thực hiện trong cùng giao dịch.
+
+| Method | Route | Mô tả | Mã lỗi |
+|---|---|---|---|
+| `GET` | `/api/orders/{id}` | Chi tiết hóa đơn và các dòng sản phẩm | `401`, `404` |
+| `POST` | `/api/orders` | Tạo hóa đơn (`CreateOrderDto`) | `400`, `401` |
+
+**Request body khi tạo hóa đơn** (`CreateOrderDto`)
+
+```json
+{
+  "customerId": 1,
+  "details": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+```
+
+`customerId` có thể là `null` cho khách mua lẻ; `details` phải có ít nhất một dòng và mỗi `quantity`
+phải lớn hơn 0. API trả `400 Bad Request` nếu khách hàng/sản phẩm không tồn tại, số lượng tồn kho
+không đủ hoặc tổng tiền vượt giới hạn kiểu dữ liệu lưu trữ. Khi tạo thành công, API trả `201 Created`
+cùng `OrderDto` và đường dẫn tới hóa đơn vừa tạo.
+
+## 5. Quy ước chung
 
 - Cấu hình JWT nằm ở section `Jwt` trong `MiniMart.API/appsettings.json`
   (`Issuer`, `Audience`, `Key`, `ExpiryMinutes`). Khi triển khai thật, `Jwt:Key` nên
@@ -164,7 +194,7 @@ API trả `409 Conflict` nếu xóa nhà cung cấp đã được dùng trong ph
 - Mật khẩu **không bao giờ** lưu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu
   và `PasswordHelper.Verify` khi đăng nhập.
 
-## 5. Cổng chạy API & cách Client kết nối
+## 6. Cổng chạy API & cách Client kết nối
 
 Cổng chuẩn (khai báo trong `MiniMart.API/Properties/launchSettings.json`):
 
@@ -195,7 +225,7 @@ dotnet run --project MiniMart.Client
 > Nếu API chỉ chạy profile `http` thì không có cổng HTTPS nào được mở, vì vậy đừng đặt
 > mặc định của Client là `https://localhost:5001/`; hãy dùng biến môi trường khi cần.
 
-## 6. Xác thực token ở phía Client
+## 7. Xác thực token ở phía Client
 
 - `MiniMart.Client/Security/AuthSession.cs` là nơi duy nhất giữ access token và tài khoản đang
   đăng nhập trong bộ nhớ; `frmLogin` gọi `AuthSession.SignIn(...)` sau khi đăng nhập thành công và
