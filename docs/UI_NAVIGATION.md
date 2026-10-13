@@ -40,7 +40,7 @@ Nếu module mới chỉ dành cho `Admin`, thêm `RequiredRole: UserRole.Admin`
 
 | Key | Nhóm | Màn hình | Trạng thái | Phụ trách |
 |---|---|---|---|---|
-| `dashboard` | Tổng quan | Tổng quan & thống kê | Đang phát triển | Member 1 (Leader) |
+| `dashboard` | Tổng quan | Tổng quan & thống kê | **Hoàn thiện** | Member 1 (Leader) |
 | `accounts` | Hệ thống | Quản lý tài khoản nhân viên (Admin) | **Hoàn thiện** | Member 1 (Leader) |
 | `catalog` | Danh mục | Quản lý danh mục & sản phẩm (Admin) | **Hoàn thiện** | Member 2 |
 | `customers` | Khách hàng | Quản lý khách hàng | Đang phát triển | Member 3 |
