@@ -112,7 +112,51 @@ Trong `UpdateUserDto`, bỏ trống `password` (hoặc để `null`) nghĩa là 
 > Các ràng buộc trên giúp không làm mất quyền quản trị của hệ thống, đồng thời việc xóa tài khoản
 > đang đăng nhập cũng bị chặn để tránh mất phiên giữa chừng.
 
-## 3. Quy ước chung
+## 3. Nhà cung cấp và phiếu nhập kho (Suppliers / ImportReceipts)
+
+Toàn bộ endpoint dưới đây chỉ dành cho `Admin`. Client không gửi `UserId`, `ImportDate` hoặc
+`TotalAmount` khi tạo phiếu nhập: API lấy nhân viên từ JWT, đặt thời gian UTC và tính tổng tiền
+từ các dòng chi tiết. Tồn kho sản phẩm được cộng trong cùng giao dịch với phiếu nhập.
+
+| Method | Route | Mô tả | Mã lỗi |
+|---|---|---|---|
+| `GET` | `/api/suppliers` | Danh sách nhà cung cấp (sắp xếp theo tên) | `401`, `403` |
+| `GET` | `/api/suppliers/{id}` | Chi tiết nhà cung cấp | `401`, `403`, `404` |
+| `POST` | `/api/suppliers` | Tạo nhà cung cấp (`CreateSupplierDto`) | `400`, `401`, `403` |
+| `PUT` | `/api/suppliers/{id}` | Cập nhật nhà cung cấp (`UpdateSupplierDto`) | `400`, `401`, `403`, `404` |
+| `DELETE` | `/api/suppliers/{id}` | Xóa nhà cung cấp chưa có phiếu nhập | `401`, `403`, `404`, `409` |
+| `GET` | `/api/importreceipts/{id}` | Chi tiết phiếu nhập và các dòng sản phẩm | `401`, `403`, `404` |
+| `POST` | `/api/importreceipts` | Tạo phiếu nhập (`CreateImportReceiptDto`) | `400`, `401`, `403` |
+
+**Request body khi tạo nhà cung cấp** (`CreateSupplierDto`)
+
+```json
+{
+  "name": "Nhà cung cấp A",
+  "phone": "0901234567",
+  "address": "Hà Nội"
+}
+```
+
+**Request body khi tạo phiếu nhập** (`CreateImportReceiptDto`)
+
+```json
+{
+  "supplierId": 1,
+  "details": [
+    {
+      "productId": 1,
+      "quantity": 10,
+      "importPrice": 12000.00
+    }
+  ]
+}
+```
+
+Phiếu nhập phải có ít nhất một dòng; `quantity` phải lớn hơn 0 và `importPrice` không được âm.
+API trả `409 Conflict` nếu xóa nhà cung cấp đã được dùng trong phiếu nhập để bảo toàn lịch sử.
+
+## 4. Quy ước chung
 
 - Cấu hình JWT nằm ở section `Jwt` trong `MiniMart.API/appsettings.json`
   (`Issuer`, `Audience`, `Key`, `ExpiryMinutes`). Khi triển khai thật, `Jwt:Key` nên
@@ -120,7 +164,7 @@ Trong `UpdateUserDto`, bỏ trống `password` (hoặc để `null`) nghĩa là 
 - Mật khẩu **không bao giờ** lưu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu
   và `PasswordHelper.Verify` khi đăng nhập.
 
-## 4. Cổng chạy API & cách Client kết nối
+## 5. Cổng chạy API & cách Client kết nối
 
 Cổng chuẩn (khai báo trong `MiniMart.API/Properties/launchSettings.json`):
 
@@ -151,7 +195,7 @@ dotnet run --project MiniMart.Client
 > Nếu API chỉ chạy profile `http` thì không có cổng HTTPS nào được mở, vì vậy đừng đặt
 > mặc định của Client là `https://localhost:5001/`; hãy dùng biến môi trường khi cần.
 
-## 5. Xác thực token ở phía Client
+## 6. Xác thực token ở phía Client
 
 - `MiniMart.Client/Security/AuthSession.cs` là nơi duy nhất giữ access token và tài khoản đang
   đăng nhập trong bộ nhớ; `frmLogin` gọi `AuthSession.SignIn(...)` sau khi đăng nhập thành công và
