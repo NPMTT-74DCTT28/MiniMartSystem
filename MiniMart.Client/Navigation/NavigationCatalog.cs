@@ -60,13 +60,14 @@ public static class NavigationCatalog
             owner: "Member 4"),
 
         // Member 5 - Nhập kho (Inventory / Suppliers)
-        Pending(
-            key: "inventory",
-            group: "Nhập kho",
-            title: "Nhập kho và nhà cung cấp",
-            description: "Quản lý nhà cung cấp và tạo phiếu nhập kho.",
-            owner: "Member 5",
-            requiredRole: UserRole.Admin)
+        new NavigationItem(
+            Key: "inventory",
+            Group: "Nhập kho",
+            Title: "Nhập kho và nhà cung cấp",
+            Description: "Quản lý nhà cung cấp và tạo phiếu nhập kho.",
+            FormFactory: () => new frmInventoryManager(),
+            RequiredRole: UserRole.Admin,
+            Owner: "Member 5")
     };
 
     /// <summary>Lấy các màn hình hiển thị với tài khoản đang đăng nhập, giữ nguyên thứ tự đăng ký.</summary>
