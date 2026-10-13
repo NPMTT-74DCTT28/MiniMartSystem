@@ -22,6 +22,7 @@ public partial class frmInventoryManager : Form
 
         Controls.Add(_tabInventory);
         InitializeSupplierTab();
+        InitializeImportReceiptTab();
     }
 
     private static void ShowApiError(Exception exception)
