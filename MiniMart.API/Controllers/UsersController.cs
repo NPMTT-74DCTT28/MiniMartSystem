@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -177,12 +178,21 @@ namespace MiniMart.API.Controllers
             return NoContent();
         }
 
-        /// <summary>Id tài khoản đang đăng nhập, lấy từ claim <c>sub</c> của access token.</summary>
+        /// <summary>
+        /// Id tài khoản đang đăng nhập, lấy từ claim chứa Id của access token.
+        /// </summary>
+        /// <remarks>
+        /// Token do <see cref="JwtTokenService"/> phát hành dùng claim ngắn <c>sub</c>, nhưng
+        /// JwtBearer mặc định ánh xạ <c>sub</c> sang <see cref="ClaimTypes.NameIdentifier"/>
+        /// (<c>MapInboundClaims</c> = true). Vì vậy phải kiểm tra cả hai tên claim.
+        /// </remarks>
         private Guid? CurrentUserId
         {
             get
             {
-                var value = User.FindFirst(SubjectClaimType)?.Value;
+                var value = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? User.FindFirst(SubjectClaimType)?.Value;
+
                 return Guid.TryParse(value, out var id) ? id : null;
             }
         }

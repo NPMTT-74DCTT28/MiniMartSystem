@@ -23,17 +23,27 @@ public class frmAccountManager : Form
         AllowUserToAddRows = false,
         AutoGenerateColumns = false,
         Dock = DockStyle.Fill,
+        Name = "dgvUsers",
         MultiSelect = false,
         ReadOnly = true,
         SelectionMode = DataGridViewSelectionMode.FullRowSelect
     };
 
-    private readonly TextBox txtId = new() { ReadOnly = true };
-    private readonly TextBox txtUsername = new();
-    private readonly TextBox txtPassword = new() { UseSystemPasswordChar = true };
-    private readonly ComboBox cbxRole = new() { DropDownStyle = ComboBoxStyle.DropDownList };
-    private readonly CheckBox chkIsActive = new() { Text = "Đang hoạt động", Checked = true };
-    private readonly CheckBox chkShowPassword = new() { Text = "Hiện mật khẩu" };
+    private readonly TextBox txtId = new() { Name = "txtId", ReadOnly = true };
+    private readonly TextBox txtUsername = new() { Name = "txtUsername" };
+    private readonly TextBox txtPassword = new() { Name = "txtPassword", UseSystemPasswordChar = true };
+    private readonly ComboBox cbxRole = new()
+    {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Name = "cbxRole"
+    };
+    private readonly CheckBox chkIsActive = new()
+    {
+        Checked = true,
+        Name = "chkIsActive",
+        Text = "Đang hoạt động"
+    };
+    private readonly CheckBox chkShowPassword = new() { Name = "chkShowPassword", Text = "Hiện mật khẩu" };
     private readonly Label lblPasswordHint = new()
     {
         AutoSize = false,

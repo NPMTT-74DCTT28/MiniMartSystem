@@ -23,11 +23,12 @@ public class frmLogin : Form
 
     private readonly BaseHttpClient _apiClient = new();
 
-    private readonly TextBox txtUsername = new();
-    private readonly TextBox txtPassword = new() { UseSystemPasswordChar = true };
+    private readonly TextBox txtUsername = new() { Name = "txtUsername" };
+    private readonly TextBox txtPassword = new() { Name = "txtPassword", UseSystemPasswordChar = true };
     private readonly CheckBox chkShowPassword = new()
     {
         AutoSize = true,
+        Name = "chkShowPassword",
         Text = "Hiện mật khẩu"
     };
     private readonly Button btnLogin = new() { Name = "btnLogin", Text = "Đăng nhập" };
@@ -35,8 +36,10 @@ public class frmLogin : Form
     private readonly Label lblMessage = new()
     {
         AutoSize = false,
+        Dock = DockStyle.Fill,
         ForeColor = ErrorColor,
         Height = 40,
+        Name = "lblMessage",
         TextAlign = ContentAlignment.MiddleLeft
     };
 
@@ -49,7 +52,7 @@ public class frmLogin : Form
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(460, 380);
+        ClientSize = new Size(460, 424);
 
         BuildLayout();
 
@@ -90,9 +93,9 @@ public class frmLogin : Form
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 56));
 
         var header = new FlowLayoutPanel
         {
