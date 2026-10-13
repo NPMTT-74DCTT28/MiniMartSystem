@@ -58,7 +58,61 @@ Authorization: Bearer <accessToken>
 Token chứa các claim `sub` (Id), `unique_name` (Username) và `role` (`Admin` | `Staff`),
 nên API có thể phân quyền bằng `[Authorize(Roles = "Admin")]`.
 
-## 2. Quy ước chung
+### Tài khoản Admin mặc định
+
+Khi API khởi động, `MiniMart.API/Data/DbSeeder.cs` tạo sẵn tài khoản quản trị nếu database chưa có,
+nhờ đó có thể đăng nhập ngay sau khi apply migration:
+
+| Trường | Giá trị |
+|---|---|
+| `username` | `admin` |
+| `password` | `Admin@123` |
+| `role` | `Admin` |
+
+Mật khẩu vẫn được lưu dưới dạng đã băm (PBKDF2) như mọi tài khoản khác. Đây là tài khoản dùng cho
+môi trường phát triển — **phải đổi mật khẩu trước khi triển khai thật**. Hàm seed an toàn khi gọi
+lặp lại nên khởi động API nhiều lần không tạo thêm tài khoản.
+
+## 2. Quản lý tài khoản nhân viên (Users)
+
+Toàn bộ endpoint dưới đây gắn `[Authorize(Roles = "Admin")]`: chỉ tài khoản `Admin` gọi được,
+các vai trò khác nhận `403 Forbidden`, chưa đăng nhập nhận `401 Unauthorized`.
+`PasswordHash` không bao giờ được trả về trong response.
+
+| Method | Route | Mô tả | Mã lỗi |
+|---|---|---|---|
+| `GET` | `/api/users` | Danh sách tài khoản (sắp xếp theo `username`) | `401`, `403` |
+| `GET` | `/api/users/{id}` | Chi tiết một tài khoản theo `Id` (Guid) | `401`, `403`, `404` |
+| `POST` | `/api/users` | Tạo tài khoản mới (`CreateUserDto`) | `400`, `401`, `403`, `409` |
+| `PUT` | `/api/users/{id}` | Cập nhật tài khoản (`UpdateUserDto`) | `400`, `401`, `403`, `404`, `409` |
+| `DELETE` | `/api/users/{id}` | Xóa tài khoản | `400`, `401`, `403`, `404` |
+
+**Request body khi tạo tài khoản** (`CreateUserDto`)
+
+```json
+{
+  "username": "nhanvien01",
+  "password": "Staff@123",
+  "role": "Staff",
+  "isActive": true
+}
+```
+
+`role` nhận chuỗi `"Admin"` hoặc `"Staff"` (enum `UserRole` gắn `JsonStringEnumConverter`).
+Trong `UpdateUserDto`, bỏ trống `password` (hoặc để `null`) nghĩa là **giữ nguyên mật khẩu cũ**.
+
+**Quy tắc nghiệp vụ được API chặn**
+
+| Trường hợp | HTTP | Thông báo |
+|---|---|---|
+| `username` đã tồn tại (khi tạo hoặc đổi tên) | `409 Conflict` | `Tên đăng nhập '<username>' đã được sử dụng.` |
+| Tự vô hiệu hóa, tự hạ quyền hoặc tự xóa tài khoản đang đăng nhập | `400 Bad Request` | `Không thể ... tài khoản đang đăng nhập.` |
+| Vô hiệu hóa, hạ quyền hoặc xóa quản trị viên đang hoạt động cuối cùng | `400 Bad Request` | `Không thể ... quản trị viên cuối cùng của hệ thống.` |
+
+> Các ràng buộc trên giúp không làm mất quyền quản trị của hệ thống, đồng thời việc xóa tài khoản
+> đang đăng nhập cũng bị chặn để tránh mất phiên giữa chừng.
+
+## 3. Quy ước chung
 
 - Cấu hình JWT nằm ở section `Jwt` trong `MiniMart.API/appsettings.json`
   (`Issuer`, `Audience`, `Key`, `ExpiryMinutes`). Khi triển khai thật, `Jwt:Key` nên
@@ -66,7 +120,7 @@ nên API có thể phân quyền bằng `[Authorize(Roles = "Admin")]`.
 - Mật khẩu **không bao giờ** lưu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu
   và `PasswordHelper.Verify` khi đăng nhập.
 
-## 3. Cổng chạy API & cách Client kết nối
+## 4. Cổng chạy API & cách Client kết nối
 
 Cổng chuẩn (khai báo trong `MiniMart.API/Properties/launchSettings.json`):
 
@@ -96,3 +150,13 @@ dotnet run --project MiniMart.Client
 
 > Nếu API chỉ chạy profile `http` thì không có cổng HTTPS nào được mở, vì vậy đừng đặt
 > mặc định của Client là `https://localhost:5001/`; hãy dùng biến môi trường khi cần.
+
+## 5. Xác thực token ở phía Client
+
+- `MiniMart.Client/Security/AuthSession.cs` là nơi duy nhất giữ access token và tài khoản đang
+  đăng nhập trong bộ nhớ; `frmLogin` gọi `AuthSession.SignIn(...)` sau khi đăng nhập thành công và
+  nút **Đăng xuất** của `frmMain` gọi `AuthSession.SignOut()`.
+- `BaseHttpClient` tự gắn header `Authorization: Bearer <token>` vào mọi request thông qua
+  `AuthTokenHandler`, nên màn hình chức năng **không cần** truyền token thủ công.
+- Token hết hạn (mặc định 120 phút, xem `Jwt:ExpiryMinutes`) thì API trả `401`; khi đó cần đăng nhập
+  lại để lấy token mới.

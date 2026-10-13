@@ -41,8 +41,7 @@ Nếu module mới chỉ dành cho `Admin`, thêm `RequiredRole: UserRole.Admin`
 | Key | Nhóm | Màn hình | Trạng thái | Phụ trách |
 |---|---|---|---|---|
 | `dashboard` | Tổng quan | Tổng quan & thống kê | Đang phát triển | Member 1 (Leader) |
-| `accounts` | Hệ thống | Quản lý tài khoản nhân viên (Admin) | Đang phát triển | Member 1 (Leader) |
-| `login` | Hệ thống | Đăng nhập / Đổi tài khoản | Đang phát triển | Member 1 (Leader) |
+| `accounts` | Hệ thống | Quản lý tài khoản nhân viên (Admin) | **Hoàn thiện** | Member 1 (Leader) |
 | `catalog` | Danh mục | Quản lý danh mục & sản phẩm (Admin) | **Hoàn thiện** | Member 2 |
 | `customers` | Khách hàng | Quản lý khách hàng | Đang phát triển | Member 3 |
 | `pos` | Bán hàng | Bán hàng tại quầy (POS) | Đang phát triển | Member 4 |
@@ -50,6 +49,9 @@ Nếu module mới chỉ dành cho `Admin`, thêm `RequiredRole: UserRole.Admin`
 
 Màn hình chưa hoàn thiện dùng `frmPlaceholder` (tên hiển thị kèm dấu `*`) để thanh điều hướng
 có đủ chỗ cho cả 5 thành viên ngay từ đầu.
+
+> Màn hình **Đăng nhập** (`frmLogin`) không nằm trên thanh điều hướng: nó chạy trước `frmMain`
+> dưới dạng hộp thoại (xem mục 6), nên không có mục nào trong `NavigationCatalog`.
 
 ## 4. Phân quyền trên thanh điều hướng
 
@@ -69,3 +71,22 @@ shell.NavigateTo("catalog");   // true nếu màn hình tồn tại và được
 
 `frmMain.LogoutRequested` phát sinh khi người dùng bấm nút **Đăng xuất**; màn hình đăng nhập
 đăng ký sự kiện này để xử lý việc đổi tài khoản. Nếu chưa có nơi xử lý, form chung sẽ tự đóng.
+
+## 6. Luồng đăng nhập - form chung - đăng xuất
+
+`MiniMart.Client/Program.cs` điều khiển vòng đời của ứng dụng:
+
+```
+frmLogin (ShowDialog) --OK--> frmMain --LogoutRequested--> quay lại frmLogin
+                        |--đóng bằng nút X--> thoát ứng dụng
+```
+
+1. `frmLogin` gọi `POST api/auth/login` qua `BaseHttpClient`. Thành công thì lưu phiên vào
+   `AuthSession.SignIn(...)` rồi đóng với `DialogResult.OK`.
+2. `Program.cs` mở `frmMain(AuthSession.CurrentUser)` nên thanh điều hướng tự ẩn/hiện theo vai trò.
+3. Nút **Đăng xuất** gọi `AuthSession.SignOut()` và đóng form chung; vòng lặp mở lại `frmLogin`
+   để đổi tài khoản mà không phải khởi động lại ứng dụng.
+
+**Lưu ý cho màn hình chức năng:** `BaseHttpClient` tự gắn `Authorization: Bearer <token>` từ
+`AuthSession`, nên các màn hình chỉ cần gọi API như bình thường. Khi chạy form độc lập (không qua
+`frmLogin`) thì chưa có token và các API có `[Authorize]` sẽ trả `401`.

@@ -15,6 +15,8 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 - **WinForms UI:** 
   - Tên Form bắt đầu bằng `frm` (VD: `frmProductManager`).
   - Controls: Nút bấm (`btnX`), Textbox (`txtX`), DataGridView (`dgvX`), ComboBox (`cbxX`).
+  - Luôn đặt `Name` cho control theo đúng tiền tố trên (kể cả control tạo bằng code) để thống nhất
+    quy ước và thuận tiện khi kiểm thử giao diện.
   - Mọi màn hình chức năng phải được đăng ký vào `MiniMart.Client/Navigation/NavigationCatalog.cs`
     để điều hướng được từ form chung `frmMain`; xem `docs/UI_NAVIGATION.md`. KHÔNG tự mở form khác
     bằng `Show()`/`ShowDialog()` trong màn hình con.
@@ -37,6 +39,11 @@ Bạn là một AI Assistant hỗ trợ lập trình C# .NET 10. Khi sinh code c
 - KHÔNG bao giờ lưu mật khẩu dạng thô: dùng `PasswordHelper.Hash` khi tạo/đổi mật khẩu và `PasswordHelper.Verify` khi đăng nhập (PBKDF2 - HMAC-SHA256, salt ngẫu nhiên cho từng tài khoản).
 - Khi đăng nhập thất bại, API trả cùng một thông báo cho cả trường hợp sai tên đăng nhập và sai mật khẩu để tránh dò tài khoản.
 - Cấu hình JWT đọc từ section `Jwt` trong `appsettings.json`; không hardcode khóa bí mật trong code C#.
+- Phía Client, access token chỉ được giữ trong `MiniMart.Client/Security/AuthSession.cs` và do
+  `BaseHttpClient` tự gắn vào header `Authorization: Bearer <token>`; màn hình chức năng KHÔNG tự
+  quản lý hay truyền token.
+- Khi đọc Id tài khoản đang đăng nhập từ token ở Controller, phải kiểm tra cả `ClaimTypes.NameIdentifier`
+  và claim `sub`, vì JwtBearer mặc định ánh xạ `sub` sang `ClaimTypes.NameIdentifier`.
 
 ## 6. Quy trình làm việc theo Task (Workflow)
 Quy trình dưới đây áp dụng cho MỌI task được giao. Khi task có kèm mã công việc (task key, ví dụ dạng `PROJECT-123` trong Jira) thì phải dùng mã đó ở tên nhánh và commit message; nếu task không cung cấp mã công việc thì bỏ qua phần liên quan tới task key, các bước còn lại vẫn giữ nguyên.
