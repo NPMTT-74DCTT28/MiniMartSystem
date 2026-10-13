@@ -1,10 +1,10 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MiniMart.API.Data;
 using MiniMart.API.Options;
 using MiniMart.API.Security;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 
 // 3. Đăng ký AppDbContext
 // Lựa chọn "LocalDb" hoặc "TailscaleDb" tùy vào môi trường phát triển hiện tại
-var connectionString = builder.Configuration.GetConnectionString("LocalDb");
+var connectionString = builder.Configuration.GetConnectionString("TailscaleDb");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
