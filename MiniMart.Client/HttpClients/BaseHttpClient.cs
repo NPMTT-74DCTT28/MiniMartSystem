@@ -34,7 +34,10 @@ namespace MiniMart.Client.HttpClients
         /// </summary>
         public BaseHttpClient(string? baseAddress)
         {
-            _httpClient = new HttpClient
+            // AuthTokenHandler tự gắn Bearer token của phiên đăng nhập hiện tại vào mỗi request.
+            var handler = new AuthTokenHandler(new HttpClientHandler());
+
+            _httpClient = new HttpClient(handler)
             {
                 BaseAddress = new Uri(ResolveBaseAddress(baseAddress))
             };
@@ -91,6 +94,59 @@ namespace MiniMart.Client.HttpClients
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
         {
             return await _httpClient.DeleteAsync(endpoint);
+        }
+
+        /// <summary>
+        /// Ném ngoại lệ kèm thông báo lỗi do API trả về (nếu có) để màn hình hiển thị qua
+        /// <c>MessageBox</c> theo quy ước xử lý lỗi trong <c>docs/AI_CONVENTIONS.md</c>.
+        /// </summary>
+        public static async Task EnsureSuccessAsync(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var errorMessage = await ReadErrorMessageAsync(response);
+
+            if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <summary>
+        /// Đọc thông báo lỗi từ response: ưu tiên trường <c>message</c> mà API trả về,
+        /// nếu không có thì dùng toàn bộ nội dung response.
+        /// </summary>
+        public static async Task<string> ReadErrorMessageAsync(HttpResponseMessage response)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                using var document = System.Text.Json.JsonDocument.Parse(content);
+
+                if (document.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                    document.RootElement.TryGetProperty("message", out var messageElement) &&
+                    messageElement.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    return messageElement.GetString() ?? string.Empty;
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // Response không phải JSON (VD: trang lỗi của server) thì trả về nguyên nội dung.
+            }
+
+            return content;
         }
     }
 }
