@@ -61,4 +61,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Tạo tài khoản Admin mặc định nếu database chưa có, để có thể đăng nhập ngay sau khi apply migration.
+await DbSeeder.SeedDefaultAdminAsync(app.Services, app.Logger);
+
 app.Run();
