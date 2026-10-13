@@ -23,19 +23,14 @@ public static class NavigationCatalog
             title: "Tổng quan và thống kê",
             description: "Xem nhanh doanh thu và tình hình bán hàng.",
             owner: "Member 1 (Leader)"),
-        Pending(
-            key: "accounts",
-            group: "Hệ thống",
-            title: "Quản lý tài khoản nhân viên",
-            description: "Tạo, cập nhật, vô hiệu hóa tài khoản và phân quyền.",
-            owner: "Member 1 (Leader)",
-            requiredRole: UserRole.Admin),
-        Pending(
-            key: "login",
-            group: "Hệ thống",
-            title: "Đăng nhập / Đổi tài khoản",
-            description: "Màn hình đăng nhập sử dụng JWT trả về từ POST api/auth/login.",
-            owner: "Member 1 (Leader)"),
+        new(
+            Key: "accounts",
+            Group: "Hệ thống",
+            Title: "Quản lý tài khoản nhân viên",
+            Description: "Tạo, cập nhật, vô hiệu hóa tài khoản và phân quyền.",
+            FormFactory: () => new frmAccountManager(),
+            RequiredRole: UserRole.Admin,
+            Owner: "Member 1 (Leader)"),
 
         // Member 2 - Quản lý Sản phẩm (Catalog)
         new(
