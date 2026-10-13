@@ -17,12 +17,13 @@ public static class NavigationCatalog
     public static IReadOnlyList<NavigationItem> Items { get; } = new List<NavigationItem>
     {
         // Member 1 (Leader) - Hệ thống & thống kê
-        Pending(
-            key: "dashboard",
-            group: "Tổng quan",
-            title: "Tổng quan và thống kê",
-            description: "Xem nhanh doanh thu và tình hình bán hàng.",
-            owner: "Member 1 (Leader)"),
+        new(
+            Key: "dashboard",
+            Group: "Tổng quan",
+            Title: "Tổng quan và thống kê",
+            Description: "Xem nhanh doanh thu và tình hình bán hàng.",
+            FormFactory: () => new frmDashboard(),
+            Owner: "Member 1 (Leader)"),
         new(
             Key: "accounts",
             Group: "Hệ thống",
